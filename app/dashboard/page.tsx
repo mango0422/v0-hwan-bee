@@ -11,6 +11,7 @@ import { useAuth } from "@/context/auth-context"
 import { useBankData } from "@/context/bank-data-context"
 import { ArrowRight, Plus, PiggyBank, RefreshCw, ArrowLeftRight } from "lucide-react"
 import Link from "next/link"
+import { LoadingScreen } from "@/components/loading-screen"
 
 export default function DashboardPage() {
   const { isAuthenticated, user, isLoading: authLoading } = useAuth()
@@ -23,17 +24,14 @@ export default function DashboardPage() {
     }
   }, [authLoading, isAuthenticated, router])
 
+  // 로딩 중이거나 인증되지 않은 경우
   if (authLoading || dataLoading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-1 container py-8">
-          <div className="flex items-center justify-center h-full">
-            <p>로딩 중...</p>
-          </div>
-        </main>
-      </div>
-    )
+    return <LoadingScreen />
+  }
+
+  // 인증되지 않은 경우 (추가 보호 계층)
+  if (!isAuthenticated) {
+    return null
   }
 
   // 최근 거래 내역 (모든 계좌의 거래 내역을 합쳐서 최근 5개만 표시)

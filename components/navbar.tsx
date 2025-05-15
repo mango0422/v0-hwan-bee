@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
 import { Home, CreditCard, ArrowLeftRight, RefreshCcw, Settings, LogOut, Menu, X } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "./mode-toggle"
 
@@ -13,10 +13,27 @@ export function Navbar() {
   const { isAuthenticated, logout } = useAuth()
   const pathname = usePathname()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   const isActive = (path: string) => {
     return pathname === path
   }
+
+  // 스크롤 이벤트 감지
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true)
+      } else {
+        setScrolled(false)
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [])
 
   const navItems = [
     { name: "홈", path: "/dashboard", icon: <Home className="mr-2 h-4 w-4" /> },
@@ -28,7 +45,12 @@ export function Navbar() {
 
   if (!isAuthenticated) {
     return (
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full border-b",
+          scrolled ? "bg-background" : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        )}
+      >
         <div className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center">
             <span className="text-xl font-bold text-primary">HwanBee</span>
@@ -49,7 +71,12 @@ export function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b",
+        scrolled ? "bg-background" : "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      )}
+    >
       <div className="container flex h-16 items-center justify-between">
         <Link href="/dashboard" className="flex items-center">
           <span className="text-xl font-bold text-primary">HwanBee</span>
@@ -88,7 +115,7 @@ export function Navbar() {
 
       {/* 모바일 메뉴 */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t">
+        <div className="md:hidden border-t bg-background">
           <div className="container py-2">
             {navItems.map((item) => (
               <Link

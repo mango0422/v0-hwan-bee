@@ -23,6 +23,13 @@ export interface Transaction {
   recipientName?: string
   recipientAccount?: string
   date: string
+  status: TransactionStatus
+  processingTime?: string
+  senderName?: string
+  senderAccount?: string
+  exchangeRate?: number
+  exchangedAmount?: number
+  fee?: number
 }
 
 export enum TransactionType {
@@ -30,6 +37,12 @@ export enum TransactionType {
   WITHDRAWAL = "WITHDRAWAL",
   TRANSFER = "TRANSFER",
   EXCHANGE = "EXCHANGE",
+}
+
+export enum TransactionStatus {
+  COMPLETED = "COMPLETED",
+  PENDING = "PENDING",
+  FAILED = "FAILED",
 }
 
 export interface ExchangeRate {

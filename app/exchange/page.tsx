@@ -13,8 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/context/auth-context"
 import { useBankData } from "@/context/bank-data-context"
 import { formatCurrency } from "@/lib/utils"
-import { AlertCircle, CheckCircle2, ArrowRight } from "lucide-react"
+import { AlertCircle, ArrowRight } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { LoadingScreen } from "@/components/loading-screen"
 
 export default function ExchangePage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
@@ -27,7 +28,6 @@ export default function ExchangePage() {
   const [amount, setAmount] = useState("")
   const [exchangedAmount, setExchangedAmount] = useState(0)
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -56,16 +56,7 @@ export default function ExchangePage() {
   }, [amount, toCurrency, exchangeRates])
 
   if (authLoading || dataLoading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-1 container py-8">
-          <div className="flex items-center justify-center h-full">
-            <p>로딩 중...</p>
-          </div>
-        </main>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   const selectedAccount = accounts.find((account) => account.id === fromAccountId)
@@ -74,7 +65,6 @@ export default function ExchangePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setSuccess(false)
 
     if (!fromAccountId) {
       setError("출금 계좌를 선택해주세요.")
@@ -103,14 +93,21 @@ export default function ExchangePage() {
       const result = await exchangeCurrency(fromAccountId, toCurrency, exchangeAmount)
 
       if (result) {
-        setSuccess(true)
-        setAmount("")
+        // 성공 페이지로 리다이렉트
+        const params = new URLSearchParams({
+          fromAccountId,
+          toCurrency,
+          amount: exchangeAmount.toString(),
+          exchangedAmount: exchangedAmount.toString(),
+          date: new Date().toISOString(),
+        })
+        router.push(`/exchange/success?${params.toString()}`)
       } else {
         setError("환전 중 오류가 발생했습니다. 다시 시도해주세요.")
+        setIsLoading(false)
       }
     } catch (err) {
       setError("환전 중 오류가 발생했습니다. 다시 시도해주세요.")
-    } finally {
       setIsLoading(false)
     }
   }
@@ -133,13 +130,6 @@ export default function ExchangePage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert className="bg-green-50 text-green-800 border-green-200">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">환전이 성공적으로 완료되었습니다.</AlertDescription>
                   </Alert>
                 )}
 

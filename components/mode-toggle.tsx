@@ -1,12 +1,12 @@
 "use client"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Sun, Laptop } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function ModeToggle() {
-  const { setTheme } = useTheme()
+  const { setTheme, theme } = useTheme()
 
   return (
     <DropdownMenu>
@@ -18,9 +18,18 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>라이트</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>다크</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>시스템</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("light")} className="flex items-center gap-2">
+          <Sun className="h-4 w-4" />
+          <span>라이트</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")} className="flex items-center gap-2">
+          <Moon className="h-4 w-4" />
+          <span>다크</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")} className="flex items-center gap-2">
+          <Laptop className="h-4 w-4" />
+          <span>시스템</span>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

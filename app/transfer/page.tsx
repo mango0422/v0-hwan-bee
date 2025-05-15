@@ -13,9 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/context/auth-context"
 import { useBankData } from "@/context/bank-data-context"
 import { formatCurrency, formatAccountNumber } from "@/lib/utils"
-import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Textarea } from "@/components/ui/textarea"
+import { LoadingScreen } from "@/components/loading-screen"
 
 export default function TransferPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth()
@@ -29,7 +30,6 @@ export default function TransferPage() {
   const [amount, setAmount] = useState("")
   const [description, setDescription] = useState("")
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
@@ -47,16 +47,7 @@ export default function TransferPage() {
   }, [authLoading, isAuthenticated, router, searchParams, accounts])
 
   if (authLoading || dataLoading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <Navbar />
-        <main className="flex-1 container py-8">
-          <div className="flex items-center justify-center h-full">
-            <p>로딩 중...</p>
-          </div>
-        </main>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   const selectedAccount = accounts.find((account) => account.id === fromAccountId)
@@ -64,7 +55,6 @@ export default function TransferPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
-    setSuccess(false)
 
     if (!fromAccountId) {
       setError("출금 계좌를 선택해주세요.")
@@ -103,17 +93,22 @@ export default function TransferPage() {
       )
 
       if (result) {
-        setSuccess(true)
-        setToAccountNumber("")
-        setRecipientName("")
-        setAmount("")
-        setDescription("")
+        // 성공 페이지로 리다이렉트
+        const params = new URLSearchParams({
+          fromAccountId,
+          toAccountNumber,
+          recipientName,
+          amount: transferAmount.toString(),
+          description: description || `${recipientName}님에게 송금`,
+          date: new Date().toISOString(),
+        })
+        router.push(`/transfer/success?${params.toString()}`)
       } else {
         setError("송금 중 오류가 발생했습니다. 다시 시도해주세요.")
+        setIsLoading(false)
       }
     } catch (err) {
       setError("송금 중 오류가 발생했습니다. 다시 시도해주세요.")
-    } finally {
       setIsLoading(false)
     }
   }
@@ -136,13 +131,6 @@ export default function TransferPage() {
                   <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-
-                {success && (
-                  <Alert className="bg-green-50 text-green-800 border-green-200">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">송금이 성공적으로 완료되었습니다.</AlertDescription>
                   </Alert>
                 )}
 
